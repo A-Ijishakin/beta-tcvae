@@ -384,9 +384,6 @@ def main():
 
     torch.cuda.set_device(args.gpu)
 
-    # data loader
-    train_loader = setup_data_loaders(args, use_cuda=True)
-
     # setup the VAE
     if args.dist == 'normal':
         prior_dist = dist.Normal()
@@ -410,8 +407,6 @@ def main():
 
     train_elbo = []
 
-    # training loop
-    dataset_size = len(train_loader.dataset)
 
     iteration = 0 
     
