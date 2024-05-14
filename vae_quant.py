@@ -38,7 +38,7 @@ class MLPEncoder(nn.Module):
         h = self.act(self.fc1(h))
         h = self.act(self.fc2(h))
         h = self.fc3(h)
-        z = h.view(x.size(0), self.output_dim)
+        z = h.view(x.size(0), 512)
         return z
 
 
@@ -65,7 +65,7 @@ class MLPDecoder(nn.Module):
 class ConvEncoder(nn.Module):
     def __init__(self, output_dim):
         super(ConvEncoder, self).__init__()
-        self.output_dim = output_dim
+        self.output_dim = 512 
 
         self.conv1 = nn.Conv2d(1, 32, 4, 2, 1)  # 32 x 32
         self.bn1 = nn.BatchNorm2d(32)
@@ -123,7 +123,7 @@ class ConvDecoder(nn.Module):
 
 
 class VAE(nn.Module):
-    def __init__(self, z_dim, use_cuda=False, prior_dist=dist.Normal(), q_dist=dist.Normal(),
+    def __init__(self, z_dim=512, use_cuda=False, prior_dist=dist.Normal(), q_dist=dist.Normal(),
                  include_mutinfo=True, tcvae=False, conv=False, mss=False):
         super(VAE, self).__init__()
 
@@ -144,12 +144,9 @@ class VAE(nn.Module):
         self.register_buffer('prior_params', torch.zeros(self.z_dim, 2))
 
         # create the encoder and decoder networks
-        if conv:
-            self.encoder = ConvEncoder(z_dim * self.q_dist.nparams)
-            self.decoder = ConvDecoder(z_dim)
-        else:
-            self.encoder = MLPEncoder(z_dim * self.q_dist.nparams)
-            self.decoder = MLPDecoder(z_dim)
+
+        self.encoder = ConvEncoder(z_dim * self.q_dist.nparams)
+        self.decoder = ConvDecoder(z_dim)
 
         if use_cuda:
             # calling cuda() here will put all the parameters of
