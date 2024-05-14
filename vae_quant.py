@@ -148,8 +148,14 @@ class VAE(nn.Module):
 
         # create the encoder and decoder networks
 
-        self.encoder = ConvEncoder(z_dim * self.q_dist.nparams)
-        self.decoder = ConvDecoder(z_dim)
+        if conv:
+            self.encoder = ConvEncoder(z_dim * self.q_dist.nparams)
+            self.decoder = ConvDecoder(z_dim) 
+            
+        else:
+            self.encoder = MLPEncoder(z_dim * self.q_dist.nparams)
+            self.decoder = MLPDecoder(z_dim) 
+        
 
         if use_cuda:
             # calling cuda() here will put all the parameters of
