@@ -173,7 +173,7 @@ class VAE(nn.Module):
 
     # define the guide (i.e. variational distribution) q(z|x)
     def encode(self, x):
-        x = x.view(x.size(0), 1, 64, 64)
+        x = x.view(x.size(0), 3, 512, 512)
         # use the encoder to get the parameters used to define q(z|x)
         z_params = self.encoder.forward(x).view(x.size(0), self.z_dim, self.q_dist.nparams)
         # sample the latent code z
@@ -181,7 +181,7 @@ class VAE(nn.Module):
         return zs, z_params
 
     def decode(self, z):
-        x_params = self.decoder.forward(z).view(z.size(0), 1, 64, 64)
+        x_params = self.decoder.forward(z).view(z.size(0), 3, 512, 512)
         xs = self.x_dist.sample(params=x_params)
         return xs, x_params
 
@@ -204,7 +204,7 @@ class VAE(nn.Module):
     def elbo(self, x, dataset_size):
         # log p(x|z) + log p(z) - log q(z|x)
         batch_size = x.size(0)
-        x = x.view(batch_size, 1, 64, 64)
+        x = x.view(batch_size, 3, 512, 512)
         prior_params = self._get_prior_params(batch_size)
         x_recon, x_params, zs, z_params = self.reconstruct_img(x)
         logpx = self.x_dist.log_density(x, params=x_params).view(batch_size, -1).sum(1)
