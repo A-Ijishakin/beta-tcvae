@@ -78,7 +78,7 @@ class ConvEncoder(nn.Module):
         self.conv5 = nn.Conv2d(64, 512, 4)
         self.bn5 = nn.BatchNorm2d(512)
         self.conv_z = nn.Conv2d(512, output_dim, 1) 
-        self.fin_lin = nn.Linear(3840, 1024)
+        # self.fin_lin = nn.Linear(3840, 1024)
 
         # setup the non-linearity
         self.act = nn.ReLU(inplace=True)
@@ -90,8 +90,8 @@ class ConvEncoder(nn.Module):
         h = self.act(self.bn3(self.conv3(h)))
         h = self.act(self.bn4(self.conv4(h)))
         h = self.act(self.bn5(self.conv5(h)))
-        z = self.conv_z(h).view(x.size(0), 3840) 
-        z = self.fin_lin(z) 
+        z = self.conv_z(h).view(x.size(0), self.output_dim) 
+        # z = self.fin_lin(z) 
         
         return z
 
