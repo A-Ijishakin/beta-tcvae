@@ -10,11 +10,11 @@ import pandas as pd
 class CelebA_Dataset(torch.utils.data.Dataset):
     def __init__(self, mode=0, classification=False, ffhq=''):
         #filter for those in the training set
-        self.datums = pd.read_csv('/home/rmapaij/HSpace-SAEs/datasets/CELEB-A/celeba.csv')
+        self.datums = pd.read_csv('celeba.csv')
         self.datums = self.datums[self.datums['set'] == mode]  
         self.ffhq = ffhq 
         #instantiate the base directory 
-        self.base = '/home/rmapaij/HSpace-SAEs/datasets/CELEB-A/img_align_celeba' 
+        self.base = 'img_align_celeba' 
         self.transform = tfs.Compose([
             tfs.ToTensor(), 
             tfs.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True)
