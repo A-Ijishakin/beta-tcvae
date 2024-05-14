@@ -424,44 +424,46 @@ def main():
     # initialize loss accumulator
     elbo_running_mean = utils.RunningAverageMeter()
     while iteration < 1000:
-        for i, x in tqdm(enumerate(train_loader)):
-            iteration += 1
-            batch_time = time.time()
-            vae.train()
-            anneal_kl(args, vae, iteration)
-            optimizer.zero_grad()
-            # transfer to GPU
-            x = x['img'] 
-            x = x.to('cuda:0') 
-            # wrap the mini-batch in a PyTorch Variable
-            x = Variable(x)
-            # do ELBO gradient and accumulate loss
-            obj, elbo = vae.elbo(x, dataset_size)
-            if utils.isnan(obj).any():
-                raise ValueError('NaN spotted in objective.')
-            obj.mean().mul(-1).backward()
-            elbo_running_mean.update(elbo.mean().data[0])
-            optimizer.step()
+        with tqdm(total=len(train_loader)) as pbar:
+            for i, x in enumerate(train_loader):
+                iteration += 1
+                batch_time = time.time()
+                vae.train()
+                anneal_kl(args, vae, iteration)
+                optimizer.zero_grad()
+                # transfer to GPU
+                x = x['img'] 
+                x = x.to('cuda:0') 
+                # wrap the mini-batch in a PyTorch Variable
+                x = Variable(x)
+                # do ELBO gradient and accumulate loss
+                obj, elbo = vae.elbo(x, dataset_size)
+                if utils.isnan(obj).any():
+                    raise ValueError('NaN spotted in objective.')
+                obj.mean().mul(-1).backward()
+                elbo_running_mean.update(elbo.mean().data[0])
+                optimizer.step()
 
-            # report training diagnostics
-            if iteration % args.log_freq == 0:
-                train_elbo.append(elbo_running_mean.avg)
-                print('[iteration %03d] time: %.2f \tbeta %.2f \tlambda %.2f training ELBO: %.4f (%.4f)' % (
-                    iteration, time.time() - batch_time, vae.beta, vae.lamb,
-                    elbo_running_mean.val, elbo_running_mean.avg))
+                # report training diagnostics
+                if iteration % args.log_freq == 0:
+                    train_elbo.append(elbo_running_mean.avg)
+                    print('[iteration %03d] time: %.2f \tbeta %.2f \tlambda %.2f training ELBO: %.4f (%.4f)' % (
+                        iteration, time.time() - batch_time, vae.beta, vae.lamb,
+                        elbo_running_mean.val, elbo_running_mean.avg))
 
-                vae.eval()
+                    vae.eval()
 
-                # plot training and test ELBOs
-                if args.visdom:
-                    display_samples(vae, x, vis)
-                    plot_elbo(train_elbo, vis)
+                    # plot training and test ELBOs
+                    if args.visdom:
+                        display_samples(vae, x, vis)
+                        plot_elbo(train_elbo, vis)
 
-                utils.save_checkpoint({
-                    'state_dict': vae.state_dict(),
-                    'args': args}, args.save, 0)
-                eval('plot_vs_gt_' + args.dataset)(vae, train_loader.dataset,
-                    os.path.join(args.save, 'gt_vs_latent_{:05d}.png'.format(iteration)))
+                    utils.save_checkpoint({
+                        'state_dict': vae.state_dict(),
+                        'args': args}, args.save, 0)
+                    eval('plot_vs_gt_' + args.dataset)(vae, train_loader.dataset,
+                        os.path.join(args.save, 'gt_vs_latent_{:05d}.png'.format(iteration)))
+                pbar.update(1)
 
     # Report statistics after training
     vae.eval()
