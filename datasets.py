@@ -14,7 +14,7 @@ class CelebA_Dataset(torch.utils.data.Dataset):
         self.datums = self.datums[self.datums['set'] == mode]  
         self.ffhq = ffhq 
         #instantiate the base directory 
-        self.base = '/home/rmapaij/HSpace-SAEs/datasets/CELEB-A/top-k' if classification else '/home/rmapaij/HSpace-SAEs/datasets/CELEB-A/h_seven' 
+        self.base = '/home/rmapaij/HSpace-SAEs/datasets/CELEB-A/img_align_celeba' 
         self.transform = tfs.Compose([
             tfs.ToTensor(), 
             tfs.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True)
@@ -51,10 +51,7 @@ class CelebA_Dataset(torch.utils.data.Dataset):
         labels = torch.tensor(self.datums.iloc[idx].drop(['id', 'set']).values.astype(float))
         return {'img': x.to(torch.float32),  
                 'index' : idx, 'path': path, 'labels': labels}   
-        
-
-    
-    
+            
     
     
     

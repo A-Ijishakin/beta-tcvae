@@ -418,6 +418,9 @@ def main():
                         prefetch_factor=4, 
                         shuffle=True)
     
+    dataset_size = len(train_loader) * 4000 
+    
+    
     # initialize loss accumulator
     elbo_running_mean = utils.RunningAverageMeter()
     while iteration < 1000:
