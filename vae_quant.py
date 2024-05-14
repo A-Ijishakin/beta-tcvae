@@ -38,7 +38,7 @@ class MLPEncoder(nn.Module):
         h = self.act(self.fc1(h))
         h = self.act(self.fc2(h))
         h = self.fc3(h)
-        z = h.view(x.size(0), 512)
+        z = h.view(x.size(0), self.output_dim)
         return z
 
 
