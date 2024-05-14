@@ -17,7 +17,7 @@ from lib.flows import FactorialNormalizingFlow
 
 from elbo_decomposition import elbo_decomposition
 from plot_latent_vs_true import plot_vs_gt_shapes, plot_vs_gt_faces  # noqa: F401
-
+from datasets import CelebA_Dataset 
 
 class MLPEncoder(nn.Module):
     def __init__(self, output_dim):
@@ -412,11 +412,20 @@ def main():
 
     # training loop
     dataset_size = len(train_loader.dataset)
-    num_iterations = len(train_loader) * args.num_epochs
-    iteration = 0
+
+    iteration = 0 
+    
+    
+    train_loader = DataLoader(CelebA_Dataset(mode=0), batch_size=4000,
+                        num_workers=8,         
+                        pin_memory=True,
+                        persistent_workers=True,
+                        prefetch_factor=4, 
+                        shuffle=True)
+    
     # initialize loss accumulator
     elbo_running_mean = utils.RunningAverageMeter()
-    while iteration < num_iterations:
+    while iteration < 1000:
         for i, x in enumerate(train_loader):
             iteration += 1
             batch_time = time.time()
@@ -424,7 +433,7 @@ def main():
             anneal_kl(args, vae, iteration)
             optimizer.zero_grad()
             # transfer to GPU
-            x = x.cuda(async=True)
+            x = x.to('cuda:0') 
             # wrap the mini-batch in a PyTorch Variable
             x = Variable(x)
             # do ELBO gradient and accumulate loss
