@@ -65,7 +65,7 @@ class MLPDecoder(nn.Module):
 class ConvEncoder(nn.Module):
     def __init__(self, output_dim):
         super(ConvEncoder, self).__init__()
-        self.output_dim = 512 
+        self.output_dim = output_dim
 
         self.conv1 = nn.Conv2d(1, 32, 4, 2, 1)  # 32 x 32
         self.bn1 = nn.BatchNorm2d(32)
