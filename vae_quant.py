@@ -78,7 +78,7 @@ class ConvEncoder(nn.Module):
         self.conv5 = nn.Conv2d(64, 512, 4)
         self.bn5 = nn.BatchNorm2d(512)
         self.conv_z = nn.Conv2d(512, output_dim, 1) 
-        self.fin_lin = nn.Linear(3840, 512)
+        self.fin_lin = nn.Linear(3840, 1024)
 
         # setup the non-linearity
         self.act = nn.ReLU(inplace=True)
@@ -144,7 +144,7 @@ class VAE(nn.Module):
         self.prior_dist = prior_dist
         self.q_dist = q_dist
         # hyperparameters for prior p(z)
-        self.register_buffer('prior_params', torch.zeros(self.z_dim, 2))
+        self.register_buffer('prior_params', torch.zeros(512, 2))
 
         # create the encoder and decoder networks
 
@@ -175,7 +175,7 @@ class VAE(nn.Module):
     def encode(self, x):
         x = x.view(x.size(0), 3, 512, 512)
         # use the encoder to get the parameters used to define q(z|x)
-        z_params = self.encoder.forward(x).view(x.size(0), self.z_dim, self.q_dist.nparams)
+        z_params = self.encoder.forward(x).view(x.size(0), 512, self.q_dist.nparams)
         # sample the latent code z
         zs = self.q_dist.sample(params=z_params)
         return zs, z_params
