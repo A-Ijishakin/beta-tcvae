@@ -9,7 +9,7 @@ import torch.optim as optim
 import visdom
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
-
+from tqdm import tqdm 
 import lib.dist as dist
 import lib.utils as utils
 import lib.datasets as dset
@@ -426,13 +426,14 @@ def main():
     # initialize loss accumulator
     elbo_running_mean = utils.RunningAverageMeter()
     while iteration < 1000:
-        for i, x in enumerate(train_loader):
+        for i, x in tqdm(enumerate(train_loader)):
             iteration += 1
             batch_time = time.time()
             vae.train()
             anneal_kl(args, vae, iteration)
             optimizer.zero_grad()
             # transfer to GPU
+            x = x['img'] 
             x = x.to('cuda:0') 
             # wrap the mini-batch in a PyTorch Variable
             x = Variable(x)

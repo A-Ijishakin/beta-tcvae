@@ -49,7 +49,7 @@ class CelebA_Dataset(torch.utils.data.Dataset):
             x = self.transform(x) 
                     
         labels = torch.tensor(self.datums.iloc[idx].drop(['id', 'set']).values.astype(float))
-        return {'img': x.to(device=f'cuda:{self.device_num}', dtype=torch.float32), 
+        return {'img': x.to(torch.float32),  
                 'index' : idx, 'path': path, 'labels': labels}   
         
 
