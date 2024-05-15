@@ -420,7 +420,7 @@ def main():
     parser.add_argument('--lambda-anneal', action='store_true')
     parser.add_argument('--mss', action='store_true', help='use the improved minibatch estimator')
     parser.add_argument('--conv', default=True)
-    parser.add_argument('--gpu', type=int, default=1)
+    parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--visdom', action='store_true', help='whether plotting in visdom is desired')
     parser.add_argument('--save', default='test1')
     parser.add_argument('--log_freq', default=200, type=int, help='num iterations per log')
@@ -457,7 +457,7 @@ def main():
     BATCH_SIZE = args.b 
     
     train_loader = DataLoader(CelebA_Dataset(mode=0), batch_size=BATCH_SIZE,
-                        num_workers=8,         
+                        num_workers=16,         
                         pin_memory=True,
                         persistent_workers=True,
                         prefetch_factor=4, 
