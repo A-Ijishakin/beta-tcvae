@@ -71,6 +71,9 @@ class ConvEncoder(nn.Module):
     def __init__(self, output_dim):
         super(ConvEncoder, self).__init__()
         self.output_dim = output_dim
+        
+        self.conv_in = nn.Conv2d(in_channels=3, out_channels=1, kernel_size=3, padding=1)
+        
         self.conv_layers = nn.Sequential(
             # First layer: reduce channels from 3 to 16, spatial dims from 512 to 256
             nn.Conv2d(3, 16, kernel_size=3, stride=2, padding=1),
@@ -109,8 +112,9 @@ class ConvEncoder(nn.Module):
         self.act = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        h = x.view(-1, 3, 512, 512) 
-        h = self.conv_layers(h) 
+        h = x.view(-1, 3, 64, 64)  
+        h = self.conv_in(h) 
+        # h = self.conv_layers(h) 
         h = self.act(self.bn1(self.conv1(h)))
         h = self.act(self.bn2(self.conv2(h)))
         h = self.act(self.bn3(self.conv3(h)))
@@ -149,17 +153,20 @@ class ConvDecoder(nn.Module):
         )
     
         # setup the non-linearity
-        self.act = nn.ReLU(inplace=True)
+        self.act = nn.ReLU(inplace=True) 
+        
+        self.transposed_conv = nn.ConvTranspose2d(in_channels=1, out_channels=3, kernel_size=3, padding=1)
 
     def forward(self, z):
-        h = z.view(z.size(0), z.size(1), 1, 1)
+        h = z.view(z.size(0), z.size(1), 1, 1) 
         h = self.act(self.bn1(self.conv1(h)))
         h = self.act(self.bn2(self.conv2(h)))
         h = self.act(self.bn3(self.conv3(h)))
         h = self.act(self.bn4(self.conv4(h)))
         h = self.act(self.bn5(self.conv5(h)))
         mu_img = self.conv_final(h) 
-        mu_img = self.deconv_layers(mu_img) 
+        mu_img = self.transposed_conv(mu_img) 
+        # mu_img = self.deconv_layers(mu_img) 
         return mu_img
 
 
@@ -491,52 +498,52 @@ def main():
     elbo_running_mean = utils.RunningAverageMeter()
     for epoch in range(1000):
         epoch_elbo = 0 
-        # with tqdm(total=len(train_loader), desc=f'Epoch {epoch}') as pbar:
-        pre_load = time.time() 
-        for i, x in enumerate(train_loader):
-            post_load = time.time() - pre_load 
-            print(f"Time taken to load the data: {post_load} seconds") 
-            pre_iter = time.time() 
-                            
-            iteration += 1
-            vae.train()
-            anneal_kl(args, vae, iteration)
-            optimizer.zero_grad()
-            # transfer to GPU
-            x = x['img'] 
-            x = x.to('cuda:0', non_blocking=True) 
-            post_iter = time.time() - pre_iter 
-            print(f"Time taken to transfer the data to GPU: {post_iter} seconds") 
-            
-            
-            # wrap the mini-batch in a PyTorch Variable
-            x = Variable(x)
-            pre_step = time.time() 
-            # do ELBO gradient and accumulate loss
-            obj, elbo = vae.elbo(x, dataset_size) 
-            post_step = time.time() - pre_step   
-            print(f"Time taken to compute the ELBO: {post_step} seconds") 
-            
-            
-            if utils.isnan(obj).any():
-                raise ValueError('NaN spotted in objective.')
-            obj.mean().mul(-1).backward()
-            elbo_running_mean.update(elbo.mean().data) 
-            epoch_elbo += elbo.mean().data  
-            optimizer.step()
+        with tqdm(total=len(train_loader), desc=f'Epoch {epoch}') as pbar:
+            pre_load = time.time() 
+            for i, x in enumerate(train_loader):
+                post_load = time.time() - pre_load 
+                print(f"Time taken to load the data: {post_load} seconds") 
+                pre_iter = time.time() 
+                                
+                iteration += 1
+                vae.train()
+                anneal_kl(args, vae, iteration)
+                optimizer.zero_grad()
+                # transfer to GPU
+                x = x['img'] 
+                x = x.to('cuda:0', non_blocking=True) 
+                post_iter = time.time() - pre_iter 
+                print(f"Time taken to transfer the data to GPU: {post_iter} seconds") 
+                
+                
+                # wrap the mini-batch in a PyTorch Variable
+                x = Variable(x)
+                pre_step = time.time() 
+                # do ELBO gradient and accumulate loss
+                obj, elbo = vae.elbo(x, dataset_size) 
+                post_step = time.time() - pre_step   
+                print(f"Time taken to compute the ELBO: {post_step} seconds") 
+                
+                
+                if utils.isnan(obj).any():
+                    raise ValueError('NaN spotted in objective.')
+                obj.mean().mul(-1).backward()
+                elbo_running_mean.update(elbo.mean().data) 
+                epoch_elbo += elbo.mean().data  
+                optimizer.step()
 
-            # report training diagnostics
-            # if iteration % args.log_freq == 0:
-            train_elbo.append(elbo_running_mean.avg) 
+                # report training diagnostics
+                # if iteration % args.log_freq == 0:
+                train_elbo.append(elbo_running_mean.avg) 
+                
+                wandb.log({'train_elbo': 
+                    elbo_running_mean.avg}, 
+                            step= (epoch * length) + i)   
+                pbar.update(1)
             
-            wandb.log({'train_elbo': 
-                elbo_running_mean.avg}, 
-                        step= (epoch * length) + i)   
-            # pbar.update(1)
-        
-        epoch_elbo /= len(train_loader)
-        if epoch_elbo > best_elbo:
-            torch.save(vae.state_dict(), 'best_model.pt') 
+            epoch_elbo /= len(train_loader)
+            if epoch_elbo > best_elbo:
+                torch.save(vae.state_dict(), 'best_model.pt') 
             
                 
                 # print('[iteration %03d] time: %.2f \tbeta %.2f \tlambda %.2f training ELBO: %.4f (%.4f)' % (

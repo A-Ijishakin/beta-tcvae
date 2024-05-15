@@ -46,7 +46,7 @@ class CelebA_Dataset(torch.utils.data.Dataset):
         x = x.crop((left, top, right, bottom))
 
         # resize the image
-        x = x.resize((512, 512))      
+        x = x.resize((64, 64))      
                 
         if self.transform is not None:
             x = self.transform(x) 
@@ -55,8 +55,6 @@ class CelebA_Dataset(torch.utils.data.Dataset):
         return {'img': x.to(torch.float32),  
                 'index' : idx, 'path': path, 'labels': labels}   
             
-    
-        return {'img': self.data, 'index' : idx} 
     
 # class FFHQ_HDataset(torch.utils.data.Dataset):
 #     def __init__(self):
