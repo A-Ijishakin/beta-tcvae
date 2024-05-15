@@ -454,7 +454,7 @@ def main():
 
     iteration = 0 
     
-    BATCH_SIZE = 4000 
+    BATCH_SIZE = args.b 
     
     train_loader = DataLoader(CelebA_Dataset(mode=0), batch_size=BATCH_SIZE,
                         num_workers=8,         

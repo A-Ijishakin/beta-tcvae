@@ -1,0 +1,205 @@
+{
+    "os": "Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-debian-bookworm-sid",
+    "python": "3.7.2",
+    "heartbeatAt": "2024-05-15T15:24:25.635415",
+    "startedAt": "2024-05-15T15:24:24.876114",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/aijishak/sae_bench/beta-tcvae/vae_quant.py",
+    "codePath": "vae_quant.py",
+    "git": {
+        "remote": "git@github.com:A-Ijishakin/beta-tcvae.git",
+        "commit": "526567f0f2980963aea696159ccfcde3ff90f593"
+    },
+    "email": "ayodeji.ijishakin.21@ucl.ac.uk",
+    "root": "/home/aijishak/sae_bench/beta-tcvae",
+    "host": "Bonaparte",
+    "username": "aijishak",
+    "executable": "/home/aijishak/miniconda3/envs/Proto-DiffAE/bin/python",
+    "cpu_count": 16,
+    "cpu_count_logical": 32,
+    "cpu_freq": {
+        "current": 2995.198999999998,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2995.199,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "total": 1006.853931427002,
+        "used": 421.7737693786621
+    },
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 4090",
+            "memory_total": 25757220864
+        }
+    ],
+    "memory": {
+        "total": 15.49215316772461
+    }
+}
