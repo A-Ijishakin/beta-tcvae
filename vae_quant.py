@@ -460,7 +460,7 @@ def main():
                         num_workers=16,         
                         pin_memory=True,
                         persistent_workers=True,
-                        prefetch_factor=4, 
+                        prefetch_factor=8, 
                         shuffle=True) 
     
     dataset_size = len(train_loader) * BATCH_SIZE
@@ -487,7 +487,7 @@ def main():
                 optimizer.zero_grad()
                 # transfer to GPU
                 x = x['img'] 
-                x = x.to('cuda:0') 
+                x = x.to('cuda:0', nonblocking=True) 
                 # wrap the mini-batch in a PyTorch Variable
                 x = Variable(x)
                 # do ELBO gradient and accumulate loss
