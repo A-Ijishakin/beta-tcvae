@@ -477,62 +477,65 @@ def main():
     
     current_device = torch.cuda.current_device() 
     device_name = torch.cuda.get_device_name(current_device)
-    print(f"Current device name: {device_name}")
+    print(f"Current device name: {device_name}") 
+    
+    
+    
+    #count the amount of parameters in the model
+    num_params = sum(p.numel() for p in vae.parameters() if p.requires_grad) 
+    print(f"Number of parameters in the model: {num_params}") 
     
     # initialize loss accumulator
     elbo_running_mean = utils.RunningAverageMeter()
     for epoch in range(1000):
         epoch_elbo = 0 
-        with tqdm(total=len(train_loader), desc=f'Epoch {epoch}') as pbar:
-            pre_load = time.time() 
-            for i, x in enumerate(train_loader):
-                post_load = time.time() - pre_load 
-                print(f"Time taken to load the data: {post_load} seconds") 
-                pre_iter = time.time() 
-                
-                
-                
-                                
-                iteration += 1
-                vae.train()
-                anneal_kl(args, vae, iteration)
-                optimizer.zero_grad()
-                # transfer to GPU
-                x = x['img'] 
-                x = x.to('cuda:0', non_blocking=True) 
-                post_iter = time.time() - pre_iter 
-                print(f"Time taken to transfer the data to GPU: {post_iter} seconds") 
-                
-                
-                # wrap the mini-batch in a PyTorch Variable
-                x = Variable(x)
-                pre_step = time.time() 
-                # do ELBO gradient and accumulate loss
-                obj, elbo = vae.elbo(x, dataset_size) 
-                post_step = time.time() - pre_step   
-                print(f"Time taken to compute the ELBO: {post_step} seconds") 
-                
-                
-                if utils.isnan(obj).any():
-                    raise ValueError('NaN spotted in objective.')
-                obj.mean().mul(-1).backward()
-                elbo_running_mean.update(elbo.mean().data) 
-                epoch_elbo += elbo.mean().data  
-                optimizer.step()
-
-                # report training diagnostics
-                # if iteration % args.log_freq == 0:
-                train_elbo.append(elbo_running_mean.avg) 
-                
-                wandb.log({'train_elbo': 
-                    elbo_running_mean.avg}, 
-                          step= (epoch * length) + i)   
-                pbar.update(1)
+        # with tqdm(total=len(train_loader), desc=f'Epoch {epoch}') as pbar:
+        pre_load = time.time() 
+        for i, x in enumerate(train_loader):
+            post_load = time.time() - pre_load 
+            print(f"Time taken to load the data: {post_load} seconds") 
+            pre_iter = time.time() 
+                            
+            iteration += 1
+            vae.train()
+            anneal_kl(args, vae, iteration)
+            optimizer.zero_grad()
+            # transfer to GPU
+            x = x['img'] 
+            x = x.to('cuda:0', non_blocking=True) 
+            post_iter = time.time() - pre_iter 
+            print(f"Time taken to transfer the data to GPU: {post_iter} seconds") 
             
-            epoch_elbo /= len(train_loader)
-            if epoch_elbo > best_elbo:
-                torch.save(vae.state_dict(), 'best_model.pt') 
-                
+            
+            # wrap the mini-batch in a PyTorch Variable
+            x = Variable(x)
+            pre_step = time.time() 
+            # do ELBO gradient and accumulate loss
+            obj, elbo = vae.elbo(x, dataset_size) 
+            post_step = time.time() - pre_step   
+            print(f"Time taken to compute the ELBO: {post_step} seconds") 
+            
+            
+            if utils.isnan(obj).any():
+                raise ValueError('NaN spotted in objective.')
+            obj.mean().mul(-1).backward()
+            elbo_running_mean.update(elbo.mean().data) 
+            epoch_elbo += elbo.mean().data  
+            optimizer.step()
+
+            # report training diagnostics
+            # if iteration % args.log_freq == 0:
+            train_elbo.append(elbo_running_mean.avg) 
+            
+            wandb.log({'train_elbo': 
+                elbo_running_mean.avg}, 
+                        step= (epoch * length) + i)   
+            # pbar.update(1)
+        
+        epoch_elbo /= len(train_loader)
+        if epoch_elbo > best_elbo:
+            torch.save(vae.state_dict(), 'best_model.pt') 
+            
                 
                 # print('[iteration %03d] time: %.2f \tbeta %.2f \tlambda %.2f training ELBO: %.4f (%.4f)' % (
                 #     iteration, time.time() - batch_time, vae.beta, vae.lamb,
