@@ -469,13 +469,17 @@ def main():
     best_elbo=-np.inf  
     
     wandb.init(project="HSpace-SAEs", entity="a-ijishakin",
-                        name='vae_training_run') 
+                        name='vae_training_run')  
+    
+    current_device = torch.cuda.current_device() 
+    device_name = torch.cuda.get_device_name(current_device)
+    print(f"Current device name: {device_name}")
     
     # initialize loss accumulator
     elbo_running_mean = utils.RunningAverageMeter()
     for epoch in range(1000):
         epoch_elbo = 0 
-        with tqdm(total=len(train_loader)) as pbar:
+        with tqdm(total=len(train_loader), desc=f'Epoch {epoch}') as pbar:
             for i, x in enumerate(train_loader):
                 iteration += 1
                 vae.train()
