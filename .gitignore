@@ -3,3 +3,6 @@ data
 *.pyc
 *.png
 *.pdf
+celeba.csv
+img_align_celeba
+best_model.pt

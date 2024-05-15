@@ -1,4 +1,5 @@
 import os
+import numpy as np 
 import time
 import math
 from numbers import Number
@@ -14,10 +15,14 @@ import lib.dist as dist
 import lib.utils as utils
 import lib.datasets as dset
 from lib.flows import FactorialNormalizingFlow
-
+import wandb 
 from elbo_decomposition import elbo_decomposition
 from plot_latent_vs_true import plot_vs_gt_shapes, plot_vs_gt_faces  # noqa: F401
 from datasets import CelebA_Dataset 
+
+wandb.init(project="HSpace-SAEs", entity="a-ijishakin",
+                        name='vae_training_run')
+
 
 class MLPEncoder(nn.Module):
     def __init__(self, output_dim):
@@ -58,7 +63,7 @@ class MLPDecoder(nn.Module):
     def forward(self, z):
         h = z.view(z.size(0), -1)
         h = self.net(h)
-        mu_img = h.view(z.size(0), 1, 64, 64)
+        mu_img = h.view(z.size(0), 3, 512, 512)
         return mu_img
 
 
@@ -66,7 +71,27 @@ class ConvEncoder(nn.Module):
     def __init__(self, output_dim):
         super(ConvEncoder, self).__init__()
         self.output_dim = output_dim
-
+        self.conv_layers = nn.Sequential(
+            # First layer: reduce channels from 3 to 16, spatial dims from 512 to 256
+            nn.Conv2d(3, 16, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),
+            
+            # Second layer: keep channels at 16, spatial dims from 256 to 128
+            nn.Conv2d(16, 16, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),
+            
+            # Third layer: reduce channels from 16 to 32, spatial dims from 128 to 64
+            nn.Conv2d(16, 32, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),
+            
+            # Fourth layer: reduce channels from 32 to 64, keep spatial dims at 64
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            
+            # Fifth layer: reduce channels from 64 to 1, keep spatial dims at 64
+            nn.Conv2d(64, 1, kernel_size=3, stride=1, padding=1)
+        )
+        
         self.conv1 = nn.Conv2d(1, 32, 4, 2, 1)  # 32 x 32
         self.bn1 = nn.BatchNorm2d(32)
         self.conv2 = nn.Conv2d(32, 32, 4, 2, 1)  # 16 x 16
@@ -84,7 +109,8 @@ class ConvEncoder(nn.Module):
         self.act = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        h = x.view(-1, 1, 64, 64)
+        h = x.view(-1, 3, 512, 512) 
+        h = self.conv_layers(h) 
         h = self.act(self.bn1(self.conv1(h)))
         h = self.act(self.bn2(self.conv2(h)))
         h = self.act(self.bn3(self.conv3(h)))
@@ -109,8 +135,19 @@ class ConvDecoder(nn.Module):
         self.bn4 = nn.BatchNorm2d(32)
         self.conv5 = nn.ConvTranspose2d(32, 32, 4, 2, 1)  # 32 x 32
         self.bn5 = nn.BatchNorm2d(32)
-        self.conv_final = nn.ConvTranspose2d(32, 1, 4, 2, 1)
-
+        self.conv_final = nn.ConvTranspose2d(32, 1, 4, 2, 1) 
+        self.deconv_layers = nn.Sequential(
+            nn.ConvTranspose2d(1, 64, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(64, 32, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(32, 16, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(16, 16, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(16, 3, kernel_size=3, stride=2, padding=1, output_padding=1)
+        )
+    
         # setup the non-linearity
         self.act = nn.ReLU(inplace=True)
 
@@ -121,7 +158,8 @@ class ConvDecoder(nn.Module):
         h = self.act(self.bn3(self.conv3(h)))
         h = self.act(self.bn4(self.conv4(h)))
         h = self.act(self.bn5(self.conv5(h)))
-        mu_img = self.conv_final(h)
+        mu_img = self.conv_final(h) 
+        mu_img = self.deconv_layers(mu_img) 
         return mu_img
 
 
@@ -372,7 +410,7 @@ def main():
         choices=['shapes', 'faces'])
     parser.add_argument('-dist', default='normal', type=str, choices=['normal', 'laplace', 'flow'])
     parser.add_argument('-n', '--num-epochs', default=50, type=int, help='number of training epochs')
-    parser.add_argument('-b', '--batch-size', default=2048, type=int, help='batch size')
+    parser.add_argument('-b', '--batch-size', default=8, type=int, help='batch size')
     parser.add_argument('-l', '--learning-rate', default=1e-3, type=float, help='learning rate')
     parser.add_argument('-z', '--latent-dim', default=512, type=int, help='size of latent dimension')
     parser.add_argument('--beta', default=1, type=float, help='ELBO penalty term')
@@ -381,7 +419,7 @@ def main():
     parser.add_argument('--beta-anneal', action='store_true')
     parser.add_argument('--lambda-anneal', action='store_true')
     parser.add_argument('--mss', action='store_true', help='use the improved minibatch estimator')
-    parser.add_argument('--conv', action='store_true')
+    parser.add_argument('--conv', default=True)
     parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--visdom', action='store_true', help='whether plotting in visdom is desired')
     parser.add_argument('--save', default='test1')
@@ -425,15 +463,17 @@ def main():
                         shuffle=True)
     
     dataset_size = len(train_loader) * 8 
+    length = len(train_loader) 
     
+    best_elbo=-np.inf  
     
     # initialize loss accumulator
     elbo_running_mean = utils.RunningAverageMeter()
-    while iteration < 1000:
+    for epoch in range(1000):
+        epoch_elbo = 0 
         with tqdm(total=len(train_loader)) as pbar:
             for i, x in enumerate(train_loader):
                 iteration += 1
-                batch_time = time.time()
                 vae.train()
                 anneal_kl(args, vae, iteration)
                 optimizer.zero_grad()
@@ -447,29 +487,41 @@ def main():
                 if utils.isnan(obj).any():
                     raise ValueError('NaN spotted in objective.')
                 obj.mean().mul(-1).backward()
-                elbo_running_mean.update(elbo.mean().data[0])
+                elbo_running_mean.update(elbo.mean().data) 
+                epoch_elbo += elbo.mean().data  
                 optimizer.step()
 
                 # report training diagnostics
-                if iteration % args.log_freq == 0:
-                    train_elbo.append(elbo_running_mean.avg)
-                    print('[iteration %03d] time: %.2f \tbeta %.2f \tlambda %.2f training ELBO: %.4f (%.4f)' % (
-                        iteration, time.time() - batch_time, vae.beta, vae.lamb,
-                        elbo_running_mean.val, elbo_running_mean.avg))
-
-                    vae.eval()
-
-                    # plot training and test ELBOs
-                    if args.visdom:
-                        display_samples(vae, x, vis)
-                        plot_elbo(train_elbo, vis)
-
-                    utils.save_checkpoint({
-                        'state_dict': vae.state_dict(),
-                        'args': args}, args.save, 0)
-                    eval('plot_vs_gt_' + args.dataset)(vae, train_loader.dataset,
-                        os.path.join(args.save, 'gt_vs_latent_{:05d}.png'.format(iteration)))
+                # if iteration % args.log_freq == 0:
+                train_elbo.append(elbo_running_mean.avg) 
+                
+                wandb.log({'train_elbo': 
+                    elbo_running_mean.avg}, 
+                          step= (epoch * length) + i)   
                 pbar.update(1)
+            
+            epoch_elbo /= len(train_loader)
+            if epoch_elbo > best_elbo:
+                torch.save(vae.state_dict(), 'best_model.pt') 
+                
+                
+                # print('[iteration %03d] time: %.2f \tbeta %.2f \tlambda %.2f training ELBO: %.4f (%.4f)' % (
+                #     iteration, time.time() - batch_time, vae.beta, vae.lamb,
+                #     elbo_running_mean.val, elbo_running_mean.avg))
+
+                # vae.eval()
+
+                # # plot training and test ELBOs
+                # if args.visdom:
+                #     display_samples(vae, x, vis)
+                #     plot_elbo(train_elbo, vis)
+
+                # utils.save_checkpoint({
+                #     'state_dict': vae.state_dict(),
+                #     'args': args}, args.save, 0)
+                # eval('plot_vs_gt_' + args.dataset)(vae, train_loader.dataset,
+                #     os.path.join(args.save, 'gt_vs_latent_{:05d}.png'.format(iteration)))
+
 
     # Report statistics after training
     vae.eval()
