@@ -484,7 +484,15 @@ def main():
     for epoch in range(1000):
         epoch_elbo = 0 
         with tqdm(total=len(train_loader), desc=f'Epoch {epoch}') as pbar:
+            pre_load = time.time() 
             for i, x in enumerate(train_loader):
+                post_load = time.time() - pre_load 
+                print(f"Time taken to load the data: {post_load} seconds") 
+                pre_iter = time.time() 
+                
+                
+                
+                                
                 iteration += 1
                 vae.train()
                 anneal_kl(args, vae, iteration)
@@ -492,10 +500,19 @@ def main():
                 # transfer to GPU
                 x = x['img'] 
                 x = x.to('cuda:0', non_blocking=True) 
+                post_iter = time.time() - pre_iter 
+                print(f"Time taken to transfer the data to GPU: {post_iter} seconds") 
+                
+                
                 # wrap the mini-batch in a PyTorch Variable
                 x = Variable(x)
+                pre_step = time.time() 
                 # do ELBO gradient and accumulate loss
-                obj, elbo = vae.elbo(x, dataset_size)
+                obj, elbo = vae.elbo(x, dataset_size) 
+                post_step = time.time() - pre_step   
+                print(f"Time taken to compute the ELBO: {post_step} seconds") 
+                
+                
                 if utils.isnan(obj).any():
                     raise ValueError('NaN spotted in objective.')
                 obj.mean().mul(-1).backward()
