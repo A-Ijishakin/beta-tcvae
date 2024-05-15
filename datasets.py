@@ -14,7 +14,7 @@ class CelebA_Dataset(torch.utils.data.Dataset):
         self.datums = self.datums[self.datums['set'] == mode]  
         self.ffhq = ffhq 
         #instantiate the base directory 
-        self.base = 'img_align_celeba' 
+        self.base = '../img_align_celeba' 
         self.transform = tfs.Compose([
             tfs.ToTensor(), 
             tfs.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True)
