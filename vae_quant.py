@@ -21,8 +21,7 @@ from plot_latent_vs_true import plot_vs_gt_shapes, plot_vs_gt_faces  # noqa: F40
 from datasets import CelebA_Dataset 
 import multiprocessing 
 
-wandb.init(project="HSpace-SAEs", entity="a-ijishakin",
-                        name='vae_training_run')
+
 
 
 class MLPEncoder(nn.Module):
@@ -468,6 +467,9 @@ def main():
     length = len(train_loader) 
     
     best_elbo=-np.inf  
+    
+    wandb.init(project="HSpace-SAEs", entity="a-ijishakin",
+                        name='vae_training_run') 
     
     # initialize loss accumulator
     elbo_running_mean = utils.RunningAverageMeter()
