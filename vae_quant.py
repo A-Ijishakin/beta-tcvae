@@ -454,15 +454,16 @@ def main():
 
     iteration = 0 
     
+    BATCH_SIZE = 4000 
     
-    train_loader = DataLoader(CelebA_Dataset(mode=0), batch_size=8,
+    train_loader = DataLoader(CelebA_Dataset(mode=0), batch_size=BATCH_SIZE,
                         num_workers=8,         
                         pin_memory=True,
                         persistent_workers=True,
                         prefetch_factor=4, 
                         shuffle=True)
     
-    dataset_size = len(train_loader) * 8 
+    dataset_size = len(train_loader) * BATCH_SIZE
     length = len(train_loader) 
     
     best_elbo=-np.inf  
