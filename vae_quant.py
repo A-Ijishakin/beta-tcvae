@@ -19,6 +19,7 @@ import wandb
 from elbo_decomposition import elbo_decomposition
 from plot_latent_vs_true import plot_vs_gt_shapes, plot_vs_gt_faces  # noqa: F401
 from datasets import CelebA_Dataset 
+import multiprocessing 
 
 wandb.init(project="HSpace-SAEs", entity="a-ijishakin",
                         name='vae_training_run')
@@ -546,4 +547,5 @@ def main():
 
 
 if __name__ == '__main__':
+    multiprocessing.set_start_method('spawn') 
     model = main()
