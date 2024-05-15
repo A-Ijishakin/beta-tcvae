@@ -487,7 +487,7 @@ def main():
                 optimizer.zero_grad()
                 # transfer to GPU
                 x = x['img'] 
-                x = x.to('cuda:0', nonblocking=True) 
+                x = x.to('cuda:0', non_blocking=True) 
                 # wrap the mini-batch in a PyTorch Variable
                 x = Variable(x)
                 # do ELBO gradient and accumulate loss
