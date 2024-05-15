@@ -502,7 +502,7 @@ def main():
             pre_load = time.time() 
             for i, x in enumerate(train_loader):
                 post_load = time.time() - pre_load 
-                print(f"Time taken to load the data: {post_load} seconds") 
+                # print(f"Time taken to load the data: {post_load} seconds") 
                 pre_iter = time.time() 
                                 
                 iteration += 1
@@ -513,7 +513,7 @@ def main():
                 x = x['img'] 
                 x = x.to('cuda:0', non_blocking=True) 
                 post_iter = time.time() - pre_iter 
-                print(f"Time taken to transfer the data to GPU: {post_iter} seconds") 
+                # print(f"Time taken to transfer the data to GPU: {post_iter} seconds") 
                 
                 
                 # wrap the mini-batch in a PyTorch Variable
@@ -522,7 +522,7 @@ def main():
                 # do ELBO gradient and accumulate loss
                 obj, elbo = vae.elbo(x, dataset_size) 
                 post_step = time.time() - pre_step   
-                print(f"Time taken to compute the ELBO: {post_step} seconds") 
+                # print(f"Time taken to compute the ELBO: {post_step} seconds") 
                 
                 
                 if utils.isnan(obj).any():
