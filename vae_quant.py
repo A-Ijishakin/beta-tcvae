@@ -541,7 +541,8 @@ def main():
                             step= (epoch * length) + i)   
                 pbar.update(1)
             
-            epoch_elbo /= len(train_loader)
+            epoch_elbo /= len(train_loader) 
+            
             if epoch_elbo > best_elbo:
                 torch.save(vae.state_dict(), 'best_model.pt') 
             
