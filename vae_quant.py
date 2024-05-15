@@ -456,12 +456,16 @@ def main():
     
     BATCH_SIZE = args.b 
     
-    train_loader = DataLoader(CelebA_Dataset(mode=0), batch_size=BATCH_SIZE,
-                        num_workers=8,         
-                        pin_memory=True,
-                        persistent_workers=True,
-                        prefetch_factor=4, 
-                        shuffle=True) 
+    # train_loader = DataLoader(CelebA_Dataset(mode=0), batch_size=BATCH_SIZE,
+    #                     num_workers=8,         
+    #                     pin_memory=True,
+    #                     persistent_workers=True,
+    #                     prefetch_factor=4, 
+    #                     shuffle=True) 
+    
+    
+    train_loader = DataLoader(CelebA_Dataset(mode=0), batch_size=BATCH_SIZE, 
+                              shuffle=True) 
     
     dataset_size = len(train_loader) * BATCH_SIZE
     length = len(train_loader) 
@@ -553,5 +557,5 @@ def main():
 
 
 if __name__ == '__main__':
-    multiprocessing.set_start_method('spawn') 
+    # multiprocessing.set_start_method('spawn') 
     model = main()
