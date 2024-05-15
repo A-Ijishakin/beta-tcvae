@@ -466,7 +466,8 @@ def main():
     
     train_loader = DataLoader(CelebA_Dataset(mode=0), batch_size=BATCH_SIZE, 
                               shuffle=True, 
-                              num_workers=8) 
+                              num_workers=8, 
+                              persistent_workers=True) 
     
     dataset_size = len(train_loader) * BATCH_SIZE
     length = len(train_loader) 
