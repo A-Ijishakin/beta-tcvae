@@ -6,3 +6,4 @@ data
 celeba.csv
 img_align_celeba
 best_model.pt
+wandb
