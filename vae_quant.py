@@ -420,7 +420,7 @@ def main():
     parser.add_argument('--lambda-anneal', action='store_true')
     parser.add_argument('--mss', action='store_true', help='use the improved minibatch estimator')
     parser.add_argument('--conv', default=True)
-    parser.add_argument('--gpu', type=int, default=0)
+    parser.add_argument('--gpu', type=int, default=1)
     parser.add_argument('--visdom', action='store_true', help='whether plotting in visdom is desired')
     parser.add_argument('--save', default='test1')
     parser.add_argument('--log_freq', default=200, type=int, help='num iterations per log')
@@ -461,7 +461,7 @@ def main():
                         pin_memory=True,
                         persistent_workers=True,
                         prefetch_factor=4, 
-                        shuffle=True)
+                        shuffle=True) 
     
     dataset_size = len(train_loader) * BATCH_SIZE
     length = len(train_loader) 
