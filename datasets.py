@@ -24,7 +24,8 @@ class CelebA_Dataset(torch.utils.data.Dataset):
         self.data = torch.randn(1, 3, 512, 512)
         
     def __len__(self): 
-        return len(self.datums) - 1 
+        # return len(self.datums) - 1 
+        return 3000 
     
     def __getitem__(self, idx):
         # path = '{}/{}'.format(self.base, 
