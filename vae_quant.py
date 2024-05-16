@@ -413,8 +413,6 @@ def anneal_kl(args, vae, iteration):
 def main():
     # parse command line arguments
     parser = argparse.ArgumentParser(description="parse args")
-    parser.add_argument('-d', '--dataset', default='shapes', type=str, help='dataset name',
-        choices=['shapes', 'faces'])
     parser.add_argument('-dist', default='normal', type=str, choices=['normal', 'laplace', 'flow'])
     parser.add_argument('-n', '--num-epochs', default=50, type=int, help='number of training epochs')
     parser.add_argument('-b', default=8, type=int, help='batch size')
