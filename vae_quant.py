@@ -18,7 +18,7 @@ from lib.flows import FactorialNormalizingFlow
 import wandb 
 from elbo_decomposition import elbo_decomposition
 from plot_latent_vs_true import plot_vs_gt_shapes, plot_vs_gt_faces  # noqa: F401
-from datasets import CelebA_Dataset 
+from datasets import CelebA_Dataset, FFHQ_Dataset 
 import multiprocessing 
 
 
@@ -430,7 +430,9 @@ def main():
     parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--visdom', action='store_true', help='whether plotting in visdom is desired')
     parser.add_argument('--save', default='test1')
-    parser.add_argument('--log_freq', default=200, type=int, help='num iterations per log')
+    parser.add_argument('--log_freq', default=200, type=int, help='num iterations per log') 
+    parser.add_argument('--dataset', type=str, default='celeba', help='dataset to use',
+        choices=['celeba', 'ffhq'] )
     args = parser.parse_args()
 
     torch.cuda.set_device(args.gpu)
@@ -471,7 +473,14 @@ def main():
     #                     shuffle=True) 
     
     
-    train_loader = DataLoader(CelebA_Dataset(mode=0), batch_size=BATCH_SIZE, 
+    if args.dataset == 'celeba':
+        dataset = CelebA_Dataset(mode=0) 
+    else:
+        dataset = FFHQ_Dataset() 
+    
+    
+    
+    train_loader = DataLoader(dataset, batch_size=BATCH_SIZE, 
                               shuffle=True, 
                               num_workers=8, 
                               persistent_workers=True) 
@@ -544,7 +553,7 @@ def main():
             epoch_elbo /= len(train_loader) 
             
             if epoch_elbo > best_elbo:
-                torch.save(vae.state_dict(), 'best_model.pt') 
+                torch.save(vae.state_dict(), f'best_model-{args.dataset}.pt') 
             
                 
                 # print('[iteration %03d] time: %.2f \tbeta %.2f \tlambda %.2f training ELBO: %.4f (%.4f)' % (
