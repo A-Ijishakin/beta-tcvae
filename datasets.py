@@ -66,7 +66,7 @@ class FFHQ_Dataset(torch.utils.data.Dataset):
         self.images = glob(self.base) 
         
     def __len__(self): 
-        return len(self.latents) - 1 
+        return len(self.images) - 1 
     
     def __getitem__(self, idx):
         x = pre_process(self.images[idx]) 
