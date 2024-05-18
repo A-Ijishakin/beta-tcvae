@@ -431,7 +431,8 @@ def main():
     parser.add_argument('--log_freq', default=200, type=int, help='num iterations per log') 
     parser.add_argument('--dataset', type=str, default='celeba', help='dataset to use',
         choices=['celeba', 'ffhq'] )
-    args = parser.parse_args()
+    args = parser.parse_args() 
+    parser.add_argument('--load', default=False, type=bool, help='load a model')   
 
     torch.cuda.set_device(args.gpu)
 
@@ -476,8 +477,6 @@ def main():
     else:
         dataset = FFHQ_Dataset() 
     
-    
-    
     train_loader = DataLoader(dataset, batch_size=BATCH_SIZE, 
                               shuffle=True, 
                               num_workers=8, 
@@ -508,9 +507,7 @@ def main():
         with tqdm(total=len(train_loader), desc=f'Epoch {epoch}') as pbar:
             pre_load = time.time() 
             for i, x in enumerate(train_loader):
-                post_load = time.time() - pre_load 
                 # print(f"Time taken to load the data: {post_load} seconds") 
-                pre_iter = time.time() 
                                 
                 iteration += 1
                 vae.train()
@@ -519,9 +516,7 @@ def main():
                 # transfer to GPU
                 x = x['img'] 
                 x = x.to('cuda:0', non_blocking=True) 
-                post_iter = time.time() - pre_iter 
                 # print(f"Time taken to transfer the data to GPU: {post_iter} seconds") 
-                
                 
                 # wrap the mini-batch in a PyTorch Variable
                 x = Variable(x)
