@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser(description='CelebA Evaluation')
 parser.add_argument('--device', default='cuda:0', type=str) 
 parser.add_argument('--num_epochs', default=100, type=int)
 parser.add_argument('--batch_size', default=128, type=int) 
-parser.add_argument('--ext', default='ffhq', type=str) 
+parser.add_argument('--ext', default='', type=str) 
 args = parser.parse_args()  
  
 
@@ -26,8 +26,9 @@ args = parser.parse_args()
 class EvalCeleba_Test():
     def __init__(self, args):
         self.args = args 
-        self.encoder = torch.load(f'/home/rmapaij/sae_bench/beta-tcvae/best_encoder-{args.ext}.pt')  
+        self.encoder = torch.load(f'/home/rmapaij/sae_bench/beta-tcvae/best_model-{args.ext}.pt')  
 
+        breakpoint()
     def train(self):
 
         
