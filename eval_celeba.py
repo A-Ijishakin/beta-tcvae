@@ -188,11 +188,11 @@ class EvalCeleba_Test():
     
 
     def save_classifier(self, classifier, type='all', epoch=None): 
-        if not os.path.exists(f'runs/m-{self.ext}/{type}'):
-            os.makedirs(f'runs/m-{self.ext}/{type}') 
+        if not os.path.exists(f'runs/m-{self.args.ext}/{type}'):
+            os.makedirs(f'runs/m-{self.args.ext}/{type}') 
             
         extra_string = f'_{epoch}' if epoch is not None else '' 
-        torch.save(classifier, f'runs/m-{self.ext}/{type}/classifier{extra_string}.pt') 
+        torch.save(classifier, f'runs/m-{self.args.ext}/{type}/classifier{extra_string}.pt') 
 
 
     def eval_accuracy(self, mode=2, batch_size=128):
@@ -202,7 +202,7 @@ class EvalCeleba_Test():
                                 persistent_workers=True)  
         
     
-        classifier = torch.load(f'runs/m-{self.ext}/all/classifier_0.pt')  
+        classifier = torch.load(f'runs/m-{self.args.ext}/all/classifier_0.pt')  
 
         test_ap = self.eval_multitask(test_loader, classifier=classifier,   
                                       loading_bar=True)  
