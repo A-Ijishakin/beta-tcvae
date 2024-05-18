@@ -26,7 +26,7 @@ args = parser.parse_args()
 class EvalCeleba_Test():
     def __init__(self, args):
         self.args = args 
-        self.encoder = torch.load(f'/home/rmapaij/sae_bench/beta-tcvae/best_model-{args.ext}.pt')  
+        self.encoder = torch.load(f'/home/rmapaij/sae_bench/beta-tcvae/best_model{args.ext}.pt')  
 
         breakpoint()
     def train(self):
