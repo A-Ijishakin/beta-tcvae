@@ -31,12 +31,12 @@ class EvalCeleba_Test():
         self.args = args 
         checkpoint = torch.load(f'/home/rmapaij/sae_bench/beta-tcvae/best_model{args.ext}.pt') 
 
-        vae = VAE(z_dim=512, use_cuda=True, prior_dist=dist.Normal(), q_dist=dist.Normal(),include_mutinfo=not True, tcvae=True, conv=True, mss=True) 
+        self.vae = VAE(z_dim=512, use_cuda=True, prior_dist=dist.Normal(), q_dist=dist.Normal(),include_mutinfo=not True, tcvae=True, conv=True, mss=True) 
         
         # Load the state_dict into the model
-        vae.load_state_dict(checkpoint)  
+        self.vae.load_state_dict(checkpoint)  
         
-        self.encoder = vae.encoder  
+        self.encoder = self.vae.encoder  
         
     def train(self):
 
@@ -72,7 +72,8 @@ class EvalCeleba_Test():
                 classifier.train()
                 for index, batch in enumerate(train_loader):
                     image, labels = batch['img'].to(self.args.device), batch['labels'].to(self.args.device)  
-                    latent = self.encoder(image) 
+                    latent = self.encoder(image).reshape(-1, 512, 2) 
+                    latent = self.vae.q_dist.sample(params=latent) 
                     breakpoint() 
                     logits = classifier(latent)   
                     # loss = loss_fn(logits, labels) 
