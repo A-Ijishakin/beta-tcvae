@@ -173,9 +173,11 @@ class EvalCeleba_Test():
     def evaluation_loop(self, eval_loader, classifier, y_gt, y_pred, pbar=None, lbar=None, mean=None, std=None, 
                         mask=None):
         for batch in eval_loader: 
-            image, labels = batch['image'].to(self.device), batch['labels'].to(self.device)  
-            predictions = nn.Sigmoid()(classifier(self.encoder(image)) ) 
-       
+            image, labels = batch['img'].to(self.args.device), batch['labels'].to(self.args.device)  
+            latent = self.encoder(image).reshape(-1, 512, 2) 
+            latent = self.vae.q_dist.sample(params=latent) 
+            predictions = classifier(latent)    
+            
             y_gt.append(labels.detach().cpu())
             y_pred.append(predictions.detach().cpu()) 
             
@@ -214,4 +216,4 @@ class EvalCeleba_Test():
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn') 
     # EvalCeleba_Test(args=args).train()  
-    EvalCeleba_Test(args=args).eval_accuracy()
+    EvalCeleba_Test(args=args).eval_accuracy() 
