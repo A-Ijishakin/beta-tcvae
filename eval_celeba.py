@@ -15,7 +15,6 @@ import os
 import argparse
 from sklearn.metrics import average_precision_score, accuracy_score, precision_score, recall_score, f1_score 
 
-
 parser = argparse.ArgumentParser(description='CelebA Evaluation') 
 parser.add_argument('--device', default='cuda:0', type=str) 
 parser.add_argument('--num_epochs', default=100, type=int)
@@ -24,8 +23,6 @@ parser.add_argument('--ext', default='', type=str)
 parser.add_argument('--check_val', default=False, type=bool) 
 args = parser.parse_args()  
  
-
-
 class EvalCeleba_Test():
     def __init__(self, args):
         self.args = args 
@@ -37,6 +34,10 @@ class EvalCeleba_Test():
         self.vae.load_state_dict(checkpoint)  
         
         self.encoder = self.vae.encoder  
+        # wandb.init(project="HSpace-SAEs", entity="a-ijishakin",
+        #                 name=f'bVAE testing {args.ext}')
+
+        # self.config = wandb.config
         
     def train(self):
 
