@@ -1,8 +1,10 @@
 import wandb 
 import torch 
 import glob 
+from vae_quant import VAE
 import numpy as np 
 import torch.nn as nn  
+import lib.dist as dist
 from datasets import CelebA_Dataset 
 import multiprocessing 
 from torch.optim import Adam     
@@ -26,9 +28,15 @@ args = parser.parse_args()
 class EvalCeleba_Test():
     def __init__(self, args):
         self.args = args 
-        self.encoder = torch.load(f'/home/rmapaij/sae_bench/beta-tcvae/best_model{args.ext}.pt')  
+        checkpoint = torch.load(f'/home/rmapaij/sae_bench/beta-tcvae/best_model{args.ext}.pt') 
 
-        breakpoint()
+        vae = VAE(z_dim=512, use_cuda=True, prior_dist=dist.Normal(), q_dist=dist.Normal(),include_mutinfo=not True, tcvae=True, conv=True, mss=True) 
+        
+        # Load the state_dict into the model
+        vae.load_state_dict(checkpoint)  
+        
+        self.encoder = vae.encoder  
+        
     def train(self):
 
         
