@@ -221,6 +221,6 @@ class EvalCeleba_Test():
         # wandb.log({"test_ap": test_ap})  
 
 if __name__ == '__main__':
-    multiprocessing.set_start_method('spawn') 
-    # EvalCeleba_Test(args=args).train()  
+    multiprocessing.set_start_method('spawn')  
+    EvalCeleba_Test(args=args).train()  
     EvalCeleba_Test(args=args).eval_accuracy() 
