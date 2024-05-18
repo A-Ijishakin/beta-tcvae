@@ -33,6 +33,9 @@ class EvalCeleba_Test():
         # Load the state_dict into the model
         self.vae.load_state_dict(checkpoint)  
         
+        
+        
+        
         self.encoder = self.vae.encoder  
         wandb.init(project="HSpace-SAEs", entity="a-ijishakin",
                         name=f'bVAE testing {args.ext}')
@@ -185,11 +188,11 @@ class EvalCeleba_Test():
     
 
     def save_classifier(self, classifier, type='all', epoch=None): 
-        if not os.path.exists(f'runs/{self.log_code}/{type}'):
-            os.makedirs(f'runs/{self.log_code}/{type}') 
+        if not os.path.exists(f'runs/m-{self.ext}/{type}'):
+            os.makedirs(f'runs/m-{self.ext}/{type}') 
             
         extra_string = f'_{epoch}' if epoch is not None else '' 
-        torch.save(classifier, f'runs/{self.log_code}/{type}/classifier{extra_string}.pt') 
+        torch.save(classifier, f'runs/m-{self.ext}/{type}/classifier{extra_string}.pt') 
 
 
     def eval_accuracy(self, mode=2, batch_size=128):
@@ -199,7 +202,7 @@ class EvalCeleba_Test():
                                 persistent_workers=True)  
         
     
-        classifier = torch.load(f'runs/{self.log_code}/all/classifier_50.pt')  
+        classifier = torch.load(f'runs/m-{self.ext}/all/classifier_0.pt')  
 
         test_ap = self.eval_multitask(test_loader, classifier=classifier,   
                                       loading_bar=True)  
