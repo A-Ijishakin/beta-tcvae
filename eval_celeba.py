@@ -21,6 +21,7 @@ parser.add_argument('--device', default='cuda:0', type=str)
 parser.add_argument('--num_epochs', default=100, type=int)
 parser.add_argument('--batch_size', default=128, type=int) 
 parser.add_argument('--ext', default='', type=str) 
+parser.add_argument('--check_val', default=False, type=bool) 
 args = parser.parse_args()  
  
 
