@@ -13,7 +13,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader 
 import os 
 import argparse
-from sklearn.metrics import average_precision_score, accuracy_score, precision_score, recall_score, f1_score 
+from sklearn.metrics import average_precision_score, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score  
 
 parser = argparse.ArgumentParser(description='CelebA Evaluation') 
 parser.add_argument('--device', default='cuda:0', type=str) 
@@ -132,7 +132,7 @@ class EvalCeleba_Test():
         if attr_idx >= 0:
             return average_precision_score(y_gt[:,attr_idx], y_pred[:,0])   # pred is only 1 dimensional
         
-        acc_list, precision_list, recall_list, f1_list = [], [], [], []
+        acc_list, precision_list, recall_list, f1_list, auc_list = [], [], [], [], []
 
         for i in range(y_gt.shape[1]):
             # ap = average_precision_score(y_gt[:,i], y_pred[:,i])
@@ -140,11 +140,13 @@ class EvalCeleba_Test():
             precision = precision_score( (y_gt[:,i] > 0).astype(int), (y_pred[:,i] > 0.5).astype(int)) 
             recall = recall_score(y_gt[:,i] > 0, y_pred[:,i] > 0.5) 
             f1 = f1_score(y_gt[:,i] > 0, y_pred[:,i] > 0.5) 
+            auc = roc_auc_score(y_gt[:,i]>0, y_pred[:,i]>0.5) 
 
             acc_list.append(acc)
             precision_list.append(precision)
             recall_list.append(recall)
             f1_list.append(f1) 
+            auc_list.append(auc) 
             
             if pbar:
                 pbar.update(1)  
@@ -152,7 +154,8 @@ class EvalCeleba_Test():
         wandb.log({'acc': np.mean(acc_list), 
                     'precision': np.mean(precision_list), 
                     'recall': np.mean(recall_list), 
-                    'f1': np.mean(f1_list)}, 
+                    'f1': np.mean(f1_list), 
+                    'auc': np.mean(auc_list)}, 
                     step=step)  
         
         # Flatten the arrays
@@ -164,13 +167,15 @@ class EvalCeleba_Test():
         global_precision = precision_score(y_gt_flat, y_pred_flat)
         global_recall = recall_score(y_gt_flat, y_pred_flat)
         global_f1 = f1_score(y_gt_flat, y_pred_flat)
-
+        global_auc = roc_auc_score(y_gt_flat, y_pred_flat) 
+        
         # Log the global metrics
         wandb.log({
             'global_acc': global_acc, 
             'global_precision': global_precision, 
             'global_recall': global_recall, 
-            'global_f1': global_f1
+            'global_f1': global_f1, 
+            'global_auc': global_auc
         })
                    
     def evaluation_loop(self, eval_loader, classifier, y_gt, y_pred, pbar=None, lbar=None, mean=None, std=None, 
