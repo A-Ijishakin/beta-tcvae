@@ -34,10 +34,10 @@ class EvalCeleba_Test():
         self.vae.load_state_dict(checkpoint)  
         
         self.encoder = self.vae.encoder  
-        # wandb.init(project="HSpace-SAEs", entity="a-ijishakin",
-        #                 name=f'bVAE testing {args.ext}')
+        wandb.init(project="HSpace-SAEs", entity="a-ijishakin",
+                        name=f'bVAE testing {args.ext}')
 
-        # self.config = wandb.config
+        self.config = wandb.config
         
     def train(self):
 
@@ -75,7 +75,6 @@ class EvalCeleba_Test():
                     image, labels = batch['img'].to(self.args.device), batch['labels'].to(self.args.device)  
                     latent = self.encoder(image).reshape(-1, 512, 2) 
                     latent = self.vae.q_dist.sample(params=latent) 
-                    breakpoint() 
                     logits = classifier(latent)   
                     # loss = loss_fn(logits, labels) 
                     loss = loss_fn.compute(logits, labels, return_dict=False)
