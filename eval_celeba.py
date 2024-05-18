@@ -36,7 +36,7 @@ class EvalCeleba_Test():
         
         
         
-        self.encoder = self.vae.encoder  
+        self.encoder = self.vae.encoder.to(args.device)
         wandb.init(project="HSpace-SAEs", entity="a-ijishakin",
                         name=f'bVAE testing {args.ext}')
 
