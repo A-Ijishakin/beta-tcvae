@@ -101,7 +101,10 @@ class EvalCeleba_Test():
 
                 if epoch % 50 == 0:
                     self.save_classifier(classifier=classifier, type='all', epoch=epoch) 
-        
+
+                if epoch == 15:
+                    self.save_classifier(classifier=classifier, type='all', epoch=epoch)  
+                
                 epoch_loss /= length  
                 wandb.log({'Epoch Loss': 
                     epoch_loss}, 
@@ -204,16 +207,15 @@ class EvalCeleba_Test():
                                 persistent_workers=True)  
         
     
-        classifier = torch.load(f'runs/m-{self.args.ext}/all/classifier_0.pt')  
+        classifier = torch.load(f'runs/m-{self.args.ext}/all/classifier_15.pt')  
 
-        test_ap = self.eval_multitask(test_loader, classifier=classifier,   
+        self.eval_multitask(test_loader, classifier=classifier,   
                                       loading_bar=True)  
         
-        test_ap = sum(test_ap)/len(test_ap) 
-        print(test_ap)
+
         # wandb.log({"test_ap": test_ap})  
 
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn') 
-    # EvalCeleba_Test(args=args).train()  
+    EvalCeleba_Test(args=args).train()  
     EvalCeleba_Test(args=args).eval_accuracy() 
