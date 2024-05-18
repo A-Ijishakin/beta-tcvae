@@ -212,7 +212,7 @@ class EvalCeleba_Test():
                                 persistent_workers=True)  
         
     
-        classifier = torch.load(f'runs/m-{self.args.ext}/all/classifier_15.pt')  
+        classifier = torch.load(f'runs/m-{self.args.ext}/best/classifier.pt')  
 
         self.eval_multitask(test_loader, classifier=classifier,   
                                       loading_bar=True)  
@@ -222,5 +222,5 @@ class EvalCeleba_Test():
 
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn') 
-    EvalCeleba_Test(args=args).train()  
+    # EvalCeleba_Test(args=args).train()  
     EvalCeleba_Test(args=args).eval_accuracy() 
