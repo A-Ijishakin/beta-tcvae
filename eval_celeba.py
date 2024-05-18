@@ -26,7 +26,7 @@ args = parser.parse_args()
 class EvalCeleba_Test():
     def __init__(self, args):
         self.args = args 
-        checkpoint = torch.load(f'/home/rmapaij/sae_bench/beta-tcvae/best_model{args.ext}.pt') 
+        checkpoint = torch.load(f'/home/rmapaij/sae_bench/beta-tcvae/best_model-{args.ext}.pt') 
 
         self.vae = VAE(z_dim=512, use_cuda=True, prior_dist=dist.Normal(), q_dist=dist.Normal(),include_mutinfo=not True, tcvae=True, conv=True, mss=True) 
         
